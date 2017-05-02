@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/batch
+        http://www.springframework.org/schema/batch/spring-batch.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--Initialization for Job-->
+
+    <import resource="classpath:config/context.xml"/>
+    <import resource="classpath:config/datasource.xml"/>
+
+    <batch:job id="playerJob" job-repository="jobRepository" restartable="false">
+        <batch:step id="playerJobStep">
+            <batch:tasklet allow-start-if-complete="true">
+                <batch:chunk reader="playerFileItemReader"
+                             processor="playerProcessor"
+                             writer="playerFileItemWriter"
+                       commit-interval="2" />
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+
+    <bean id="player" class="com.cenxui.mybatis.domain.first.Player" scope="prototype"/>
+    <bean id="playerFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" value="classpath:data/csv/player.csv" />
+        <property name="lineMapper">
+            <bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <property name="lineTokenizer">
+                    <bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <property name="names" value="ID,lastName,firstName,position,birthYear,debutYear" />
+                    </bean>
+                </property>
+                <property name="fieldSetMapper">
+                    <bean class="com.cenxui.mybatis.domain.first.PlayFiledSetMapper" />
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="com.cenxui.domain.first"/>
+
+    <bean id="playerProcessor" class="com.cenxui.mybatis.domain.first.PlayerProcessor"/>
+
+    <bean id="playerFileItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file://Users/cenxui/outputs/player.txt" />
+        <property name="shouldDeleteIfExists" value="true" />
+
+        <property name="lineAggregator">
+            <bean
+                    class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <property name="delimiter" value="," />
+                <property name="fieldExtractor">
+                    <bean
+                            class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <property name="names" value="id, lastName, firstName, position, birthYear, debutYear" />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+    </bean>
+</beans>

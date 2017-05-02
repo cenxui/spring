@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <import resource="classpath:config/datasource.xml"/>
+
+    <!--Initialization for TransactionManager-->
+    <!--<bean id="transactionManager"-->
+    <!--class="oorg.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+    <!--<property name="dataSource" ref="dataSource"/>-->
+    <!--</bean>-->
+
+    <bean id="transactionManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+
+    <!--Initialization for JobRepository-->
+
+    <bean id="jobRepository"
+          class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+    <!--<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">-->
+    <!--<property name="databaseType" value="db2"/>-->
+    <!--<property name="dataSource" ref="dataSource"/>-->
+    <!--</bean>-->
+
+
+    <!--Initialization for JobLauncher-->
+    <bean id="jobLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="taskExecutor">
+            <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+        </property>
+    </bean>
+
+    <!--Querying the Repository-->
+
+    <!--<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"-->
+          <!--p:dataSource-ref="dataSource" p:tablePrefix="BATCH_"/>-->
+
+    <!--Initialization for JobRegistry-->
+
+    <bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
+
+    <!--<bean id="jobRegistryBeanPostProcessor"-->
+          <!--class="org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor">-->
+        <!--<property name="jobRegistry" ref="jobRegistry"/>-->
+    <!--</bean>-->
+
+    <!--<bean class="org.springframework.batch.core.configuration.support.AutomaticJobRegistrar">-->
+        <!--<property name="applicationContextFactories">-->
+            <!--<bean class="org.springframework.batch.core.configuration.support.ClasspathXmlApplicationContextsFactoryBean">-->
+            <!--</bean>-->
+        <!--</property>-->
+        <!--<property name="jobLoader">-->
+            <!--<bean class="org.springframework.batch.core.configuration.support.DefaultJobLoader">-->
+                <!--<property name="jobRegistry" ref="jobRegistry"/>-->
+            <!--</bean>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--Initialization for JobOperator-->
+
+    <!--<bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator">-->
+        <!--<property name="jobExplorer">-->
+            <!--<bean class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">-->
+                <!--<property name="dataSource" ref="dataSource"/>-->
+            <!--</bean>-->
+        <!--</property>-->
+        <!--<property name="jobRepository" ref="jobRepository"/>-->
+        <!--<property name="jobRegistry" ref="jobRegistry"/>-->
+        <!--<property name="jobLauncher" ref="jobLauncher"/>-->
+    <!--</bean>-->
+</beans>
+
